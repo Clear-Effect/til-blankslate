@@ -1,4 +1,5 @@
 <?php
+wp_enqueue_script( 'jquery' );
 add_action( 'after_setup_theme', 'blankslate_setup' );
 function blankslate_setup() {
 load_theme_textdomain( 'blankslate', get_template_directory() . '/languages' );
@@ -17,19 +18,19 @@ function blankslate_notice() {
 $user_id = get_current_user_id();
 $admin_url = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http' ) . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 $param = ( count( $_GET ) ) ? '&' : '?';
-if ( !get_user_meta( $user_id, 'blankslate_notice_dismissed_10' ) && current_user_can( 'manage_options' ) )
-echo '<div class="notice notice-info"><p><a href="' . esc_url( $admin_url ), esc_html( $param ) . 'dismiss" class="alignright" style="text-decoration:none"><big>' . esc_html__( 'Ⓧ', 'blankslate' ) . '</big></a>' . wp_kses_post( __( '<big><strong>🏆 Thank you for using BlankSlate!</strong></big>', 'blankslate' ) ) . '<p>' . esc_html__( 'Powering over 10k websites! Buy me a sandwich! 🥪', 'blankslate' ) . '</p><a href="https://github.com/bhadaway/blankslate/issues/57" class="button-primary" target="_blank"><strong>' . esc_html__( 'How do you use BlankSlate?', 'blankslate' ) . '</strong></a> <a href="https://opencollective.com/blankslate" class="button-primary" style="background-color:green;border-color:green" target="_blank"><strong>' . esc_html__( 'Donate', 'blankslate' ) . '</strong></a> <a href="https://wordpress.org/support/theme/blankslate/reviews/#new-post" class="button-primary" style="background-color:purple;border-color:purple" target="_blank"><strong>' . esc_html__( 'Review', 'blankslate' ) . '</strong></a> <a href="https://github.com/bhadaway/blankslate/issues" class="button-primary" style="background-color:orange;border-color:orange" target="_blank"><strong>' . esc_html__( 'Support', 'blankslate' ) . '</strong></a></p></div>';
+if ( !get_user_meta( $user_id, 'blankslate_notice_dismissed_9' ) && current_user_can( 'manage_options' ) )
+echo '<div class="notice notice-info"><p><a href="' . esc_url( $admin_url ), esc_html( $param ) . 'dismiss" class="alignright" style="text-decoration:none"><big>' . esc_html__( 'Ⓧ', 'blankslate' ) . '</big></a>' . wp_kses_post( __( '<big><strong>🏆 Thank you for using BlankSlate!</strong></big>', 'blankslate' ) ) . '<p>' . esc_html__( 'Powering over 10k websites! Buy me a sandwich! 🥪', 'blankslate' ) . '</p><a href="https://opencollective.com/blankslate" class="button-primary" style="background-color:green;border-color:green" target="_blank"><strong>' . esc_html__( 'Donate', 'blankslate' ) . '</strong> ' . esc_html__( '(New Open Collective)', 'blankslate' ) . '</a> <a href="https://wordpress.org/support/theme/blankslate/reviews/#new-post" class="button-primary" style="background-color:purple;border-color:purple" target="_blank"><strong>' . esc_html__( 'Review', 'blankslate' ) . '</strong></a> <a href="https://github.com/tidythemes/blankslate/issues" class="button-primary" style="background-color:orange;border-color:orange" target="_blank"><strong>' . esc_html__( 'Support', 'blankslate' ) . '</strong></a></p></div>';
 }
 add_action( 'admin_init', 'blankslate_notice_dismissed' );
 function blankslate_notice_dismissed() {
 $user_id = get_current_user_id();
 if ( isset( $_GET['dismiss'] ) )
-add_user_meta( $user_id, 'blankslate_notice_dismissed_10', 'true', true );
+add_user_meta( $user_id, 'blankslate_notice_dismissed_9', 'true', true );
 }
 add_action( 'wp_enqueue_scripts', 'blankslate_enqueue' );
 function blankslate_enqueue() {
 wp_enqueue_style( 'blankslate-style', get_stylesheet_uri() );
-wp_enqueue_script( 'jquery' );
+
 }
 add_action( 'wp_footer', 'blankslate_footer' );
 function blankslate_footer() {
@@ -102,7 +103,7 @@ do_action( 'wp_body_open' );
 }
 add_action( 'wp_body_open', 'blankslate_skip_link', 5 );
 function blankslate_skip_link() {
-echo '<a href="#content" class="skip-link screen-reader-text">' . esc_html__( 'Skip to the content', 'blankslate' ) . '</a>';
+//echo '<a href="#page0" class="skip-link screen-reader-text">' . esc_html__( 'Skip to the content', 'blankslate' ) . '</a>';
 }
 add_filter( 'the_content_more_link', 'blankslate_read_more_link' );
 function blankslate_read_more_link() {
@@ -164,3 +165,281 @@ return count( $comments_by_type['comment'] );
 return $count;
 }
 }
+
+function identifyBaseRepoURL() {
+	$baseUrl = 'https://' . $_SERVER['SERVER_NAME'];
+	if (strpos($baseUrl,'uat') !== false) {
+    	return 'eLearning1.0-uat';
+	} else if(strpos($baseUrl,'dev') !== false) {
+    	return 'eLearning1.0-development';
+	} else {
+		return 'eLearning1.1';
+	}
+}
+
+function validateHasKey($hashToCheck) {
+	$fullURL = $_SERVER['REQUEST_URI'];
+	if (strpos($fullURL,$hashToCheck) !== false) {
+    	return true;
+	}  else {
+		$baseUrl = 'https://' . $_SERVER['SERVER_NAME'].'/404';
+		header("Location:".$baseUrl);
+		exit();
+	}
+}
+
+function amazeAplusJS() {
+	$hashNotNeed = is_user_logged_in();
+    if(!$hashNotNeed) {
+		$hasKeyTrue = validateHasKey('31d6cfe0d16ae931b73c59d7e0c089c0');
+		if($hasKeyTrue){
+			$repoPath = identifyBaseRepoURL();
+			ob_start();
+			echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+			echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/amaze/aplus/courseVariableseLearning.js';head.appendChild(script);</script>";
+			$output = ob_get_contents();
+    		ob_end_clean();
+    		return $output;
+		}
+	}
+}
+add_shortcode( 'addAplusJS' , 'amazeAplusJS');
+
+function foundationActionPlanJS() {
+	$hashNotNeed = is_user_logged_in();
+    if(!$hashNotNeed) {
+		$hasKeyTrue = validateHasKey('31d6cfe0d16ae931b73c59d7e0c089c0');
+		if($hasKeyTrue){
+			$repoPath = identifyBaseRepoURL();
+			ob_start();
+			echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+			echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/amaze/aplus/actionPlan.js';head.appendChild(script);</script>";
+			echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/clients/amaze/aplus/actionplan.css');document.head.appendChild(csslink);</script>";
+			$output = ob_get_contents();
+    		ob_end_clean();
+    		return $output;
+		}
+	}
+}
+add_shortcode( 'addFoundationActionPlanJS' , 'foundationActionPlanJS');
+
+function aracyJS() {
+	$repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+    echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/aracy/courseVariableseLearning.js';head.appendChild(script);</script>";
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'aracy', 'aracyJS' );
+
+function splJS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/spl/courseVariableseLearning.js';head.appendChild(script);</script>";
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'spl', 'splJS' );
+
+function svhaJS() {
+	$repoPath = identifyBaseRepoURL();
+    ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+    echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/svha/safetyLeadership-courseVariableseLearning.js';head.appendChild(script);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'svha', 'svhaJS' );
+
+function amazeAddJS() {
+	$repoPath = identifyBaseRepoURL();
+    ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/amaze/courseVariableseLearning.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/clients/amaze/amazeQuizzes.css');document.head.appendChild(csslink);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'amazeJS', 'amazeAddJS' );
+
+function addPPSJS() {
+    $repoPath = identifyBaseRepoURL();
+    ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/psa/pps/courseVariableseLearning.js';head.appendChild(script);</script>";
+  	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'psaPpsJS', 'addPPSJS' );
+
+function splTextToSpeech() {
+    ob_start();
+    ?>
+    <script>
+    	var head = document.head;
+    	var script = document.createElement('script');
+    	script.type = 'text/javascript';
+    	script.src = 'https://code.responsivevoice.org/responsivevoice.js?key=tLOnRM4g';
+		head.appendChild(script);
+    </script>
+<?php	
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'splReponsiveVoice', 'splTextToSpeech' );
+
+function embedHTML2PDF() {
+	$repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/developmentPlan/displayDevelopmentPlan.js';head.appendChild(script);</script>";
+  	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/clients/svha/developmentPlan.css');document.head.appendChild(csslink);</script>";
+    ?>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<?php	
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'PDFexport', 'embedHTML2PDF' );
+
+function addPPSCSS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink2 = document.createElement('link');csslink2.setAttribute('rel', 'stylesheet');csslink2.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink2);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/clients/psa/pps/eLearning.css');document.head.appendChild(csslink);</script>";
+  	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'ppsAPCSS', 'addPPSCSS' );
+
+
+
+function workRespectJS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/ywca/work-respect/wr-courseVariableseLearning.js';head.appendChild(script);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addWorkRespectJS' , 'workRespectJS');
+
+function workRespectEmployerJS() {
+	$repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/ywca/work-respect/wrEmployer-courseVariableseLearning.js';head.appendChild(script);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addWorkRespectEmployerJS' , 'workRespectEmployerJS');
+
+function certificateThreeJS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/ywca/certificate-three/courseVariableseLearning.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/clients/ywca/certificate-three/eLearning.css');document.head.appendChild(csslink);</script>";
+    ?>
+		<script>
+		var script2 = document.createElement('script');
+    	script2.type = 'text/javascript';
+    	script2.src = 'https://code.responsivevoice.org/responsivevoice.js?key=2zn27hln';
+		head.appendChild(script2);
+
+		</script>
+
+<?php	
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addCertificateThreeJS' , 'certificateThreeJS');
+
+function psaTravelHealthJS() {
+	$repoPath = identifyBaseRepoURL();
+    ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/psa/travel-health/courseVariableseLearning.js';head.appendChild(script);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addpsaTravelHealthJS' , 'psaTravelHealthJS');
+
+function wellbeingLiteracyJS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/aracy/wellbeingliteracy/courseVariableseLearning.js';head.appendChild(script);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addWellbeingLiteracyJS' , 'wellbeingLiteracyJS');
+
+function wellbeingLiteracyCSS() {
+	$repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/css/genesisBaseStyle.css');document.head.appendChild(csslink);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/clients/aracy/wellbeingliteracy/actionPlan.css');document.head.appendChild(csslink);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addWellbeingLiteracyCSS' , 'wellbeingLiteracyCSS');
+
+function clearDefaultJS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/clear/default/courseVariableseLearning.js';head.appendChild(script);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addClearDefaultJS' , 'clearDefaultJS');
+
+function ppsReportsCSS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var csslink = document.createElement('link');csslink.setAttribute('rel', 'stylesheet');csslink.setAttribute('href', '/wp-content/plugins/".strval($repoPath)."/clients/psa/pps/reports.css');document.head.appendChild(csslink);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addPPSReportsCSS' , 'ppsReportsCSS');
+
+function tilDefaultJS() {
+    $repoPath = identifyBaseRepoURL();
+	ob_start();
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/repoPath.js';head.appendChild(script);</script>";
+	echo "<script>var head = document.head; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '/wp-content/plugins/".strval($repoPath)."/clients/thisislearning/base/courseVariableseLearning.js';head.appendChild(script);</script>";
+	$output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+}
+add_shortcode( 'addTilDefaultJS' , 'tilDefaultJS');
